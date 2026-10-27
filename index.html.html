@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendário Escolar 26/27</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            title: ['"Playfair Display"', 'serif'],
+            handwriting: ['Caveat', 'cursive'],
+            sans: ['Nunito', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+
+    /* Print settings */
+    @media print {
+      .no-print,
+      .action-buttons,
+      header,
+      button,
+      #managerModal,
+      #messageBox {
+        display: none !important;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+
+      html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+      }
+
+      .print-container {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        background: transparent !important;
+      }
+
+      .month-block {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        margin-bottom: 16px !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-amber-50/40 text-slate-800 font-sans min-h-screen p-2 sm:p-4 md:p-8">
+
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- HEADER / ACTION BAR -->
+    <header class="no-print bg-white/95 backdrop-blur border border-amber-200 shadow-sm rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-amber-100 text-amber-700 p-2.5 rounded-xl text-xl select-none">
+          📅
+        </div>
+        <div>
+          <h1 class="font-bold text-lg text-slate-800 leading-tight">Calendário Escolar 26/27</h1>
+          <p class="text-xs text-slate-500">Gestão Interativa &amp; Personalizada</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="openAddEventModal()" class="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-md transition transform active:scale-95">
+          <span>➕</span> Adicionar Evento
+        </button>
+
+        <button id="btnOpenManager" onclick="toggleModal('managerModal')" class="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-md transition transform active:scale-95">
+          <span>⚙️</span> Definições &amp; Gestão
+        </button>
+
+        <button onclick="triggerPrint()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-md transition transform active:scale-95">
+          <span>🖨️</span> Imprimir / Salvar PDF
+        </button>
+
+        <button onclick="savePageHTML()" class="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-md transition transform active:scale-95">
+          <span>💾</span> Salvar Página
+        </button>
+      </div>
+    </header>
+
+    <!-- QUICK FILTER SECTION -->
+    <section class="no-print bg-white/90 border border-amber-200 rounded-2xl p-4 shadow-sm space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+          🔍 Filtros de Visualização
+        </span>
+        <button onclick="resetFilters()" class="text-xs text-amber-600 hover:text-amber-800 font-semibold transition">
+          Mostrar Tudo
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div>
+          <span class="font-semibold text-slate-600 block mb-1.5">Pessoas:</span>
+          <div id="filterPeopleContainer" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <div>
+          <span class="font-semibold text-slate-600 block mb-1.5">Categorias:</span>
+          <div id="filterCategoriesContainer" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <div>
+          <span class="font-semibold text-slate-600 block mb-1.5">Meses a exibir:</span>
+          <div id="filterMonthsContainer" class="flex flex-wrap gap-1 max-h-24 overflow-y-auto custom-scrollbar p-1 border border-slate-100 rounded-lg"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALENDAR SHEET (PRINTABLE) -->
+    <main class="print-container bg-amber-50/30 border-4 border-amber-200/80 rounded-3xl p-4 sm:p-8 shadow-xl relative overflow-hidden bg-white">
+      
+      <!-- HEADER SHEET -->
+      <div class="flex items-center justify-between border-b-2 border-dashed border-amber-200 pb-4 mb-6">
+        <div class="hidden sm:flex items-center gap-2 text-amber-800">
+          <span class="text-3xl">📚</span>
+          <div class="text-xs font-handwriting text-lg leading-tight text-amber-900 font-bold hidden md:block">
+            Aprender • Sonhar • Conquistar
+          </div>
+        </div>
+
+        <div class="text-center flex-1">
+          <div class="inline-flex items-center gap-2 text-2xl sm:text-4xl font-title font-extrabold text-amber-900 tracking-tight">
+            <span>🎵</span>
+            <span>Calendário Escolar 26/27</span>
+            <span>🎨</span>
+          </div>
+          <div class="text-amber-800 font-handwriting text-xl sm:text-2xl mt-1 font-bold flex items-center justify-center gap-2">
+            <span id="displayPeopleSubtitle">Salomé e Henrique</span>
+            <span>•</span>
+            <span id="displayPeriodSubtitle">Ano Letivo 2026/2027</span>
+          </div>
+        </div>
+
+        <div class="hidden sm:flex items-center gap-2 text-amber-800">
+          <span class="text-4xl">🎻</span>
+        </div>
+      </div>
+
+      <!-- LEGEND -->
+      <div id="calendarLegend" class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs font-semibold mb-6 bg-amber-100/50 p-2.5 rounded-2xl border border-amber-200"></div>
+
+      <!-- MONTHS GRID -->
+      <div id="monthsGrid" class="space-y-6"></div>
+
+      <!-- FOOTER -->
+      <footer class="mt-8 pt-4 border-t border-amber-200 text-center text-xs text-amber-800/70 font-semibold flex items-center justify-between">
+        <span>✨ Organização &amp; Sucesso Escolar</span>
+        <span>Ano Letivo 2026 / 2027</span>
+      </footer>
+    </main>
+
+  </div>
+
+  <!-- MANAGEMENT MODAL -->
+  <div id="managerModal" class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 z-50 hidden">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+      
+      <div class="bg-amber-500 text-white p-4 px-6 flex items-center justify-between">
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <span>⚙️</span> Painel de Gestão do Calendário
+        </h2>
+        <button onclick="toggleModal('managerModal')" class="text-white/80 hover:text-white text-2xl font-bold leading-none">×</button>
+      </div>
+
+      <!-- TABS -->
+      <div class="flex border-b border-slate-200 bg-slate-50 text-xs sm:text-sm font-semibold">
+        <button id="tabBtnEvents" onclick="switchTab('events')" class="flex-1 py-3 px-4 text-center border-b-2 border-amber-500 text-amber-700 font-bold bg-white">
+          📅 Adicionar/Gerir Eventos
+        </button>
+        <button id="tabBtnPeople" onclick="switchTab('people')" class="flex-1 py-3 px-4 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800">
+          👤 Pessoas
+        </button>
+        <button id="tabBtnCategories" onclick="switchTab('categories')" class="flex-1 py-3 px-4 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800">
+          🏷️ Categorias
+        </button>
+      </div>
+
+      <!-- TAB CONTENTS -->
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-6 flex-1 text-sm">
+
+        <!-- TAB 1: EVENTS -->
+        <div id="tabContentEvents" class="space-y-6">
+          <form id="eventForm" onsubmit="handleSaveEvent(event)" class="bg-amber-50/60 p-4 rounded-2xl border border-amber-200 space-y-3">
+            <h3 id="eventFormTitle" class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+              <span>✨</span> Criar / Editar Evento
+            </h3>
+            <input type="hidden" id="eventId" value="">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Data:</label>
+                <input type="date" id="eventDate" required min="2026-09-01" max="2027-08-31" class="w-full border border-slate-300 rounded-xl p-2 focus:ring-2 focus:ring-amber-400 outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Pessoa:</label>
+                <select id="eventPerson" required class="w-full border border-slate-300 rounded-xl p-2 focus:ring-2 focus:ring-amber-400 outline-none"></select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Categoria:</label>
+                <select id="eventCategory" required class="w-full border border-slate-300 rounded-xl p-2 focus:ring-2 focus:ring-amber-400 outline-none"></select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Descrição / Disciplina:</label>
+                <input type="text" id="eventTitle" placeholder="Ex: Teste de Matemática" required class="w-full border border-slate-300 rounded-xl p-2 focus:ring-2 focus:ring-amber-400 outline-none">
+              </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+              <button type="button" onclick="resetEventForm()" class="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700">Limpar</button>
+              <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition">Guardar Evento</button>
+            </div>
+          </form>
+
+          <div>
+            <h4 class="font-bold text-slate-700 mb-2 text-xs uppercase tracking-wider">Todos os Eventos Agendados:</h4>
+            <div class="max-h-56 overflow-y-auto border border-slate-200 rounded-2xl custom-scrollbar">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-100 text-slate-600 sticky top-0">
+                  <tr>
+                    <th class="p-2.5">Data</th>
+                    <th class="p-2.5">Pessoa</th>
+                    <th class="p-2.5">Categoria</th>
+                    <th class="p-2.5">Descrição</th>
+                    <th class="p-2.5 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="eventsTableBody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: PEOPLE -->
+        <div id="tabContentPeople" class="space-y-6 hidden">
+          <form onsubmit="handleAddPerson(event)" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <h3 class="font-bold text-slate-800 text-sm">Adicionar / Editar Pessoa</h3>
+            <input type="hidden" id="editPersonId" value="">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Nome:</label>
+                <input type="text" id="personName" placeholder="Ex: Maria" required class="w-full border border-slate-300 rounded-xl p-2 outline-none focus:ring-2 focus:ring-amber-400">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Símbolo / Emoji:</label>
+                <input type="text" id="personSymbol" placeholder="Ex: ❤️" required class="w-full border border-slate-300 rounded-xl p-2 outline-none focus:ring-2 focus:ring-amber-400">
+              </div>
+            </div>
+
+            <div>
+              <span class="block text-xs text-slate-500 mb-1">Escolha rápida de emoji:</span>
+              <div class="flex flex-wrap gap-1 text-base">
+                <button type="button" onclick="setPersonSymbol('❤️')" class="p-1 hover:bg-slate-200 rounded">❤️</button>
+                <button type="button" onclick="setPersonSymbol('⭐')" class="p-1 hover:bg-slate-200 rounded">⭐</button>
+                <button type="button" onclick="setPersonSymbol('💙')" class="p-1 hover:bg-slate-200 rounded">💙</button>
+                <button type="button" onclick="setPersonSymbol('💚')" class="p-1 hover:bg-slate-200 rounded">💚</button>
+                <button type="button" onclick="setPersonSymbol('💜')" class="p-1 hover:bg-slate-200 rounded">💜</button>
+                <button type="button" onclick="setPersonSymbol('🧡')" class="p-1 hover:bg-slate-200 rounded">🧡</button>
+                <button type="button" onclick="setPersonSymbol('💛')" class="p-1 hover:bg-slate-200 rounded">💛</button>
+                <button type="button" onclick="setPersonSymbol('💎')" class="p-1 hover:bg-slate-200 rounded">💎</button>
+                <button type="button" onclick="setPersonSymbol('👤')" class="p-1 hover:bg-slate-200 rounded">👤</button>
+                <button type="button" onclick="setPersonSymbol('🌸')" class="p-1 hover:bg-slate-200 rounded">🌸</button>
+                <button type="button" onclick="setPersonSymbol('🎸')" class="p-1 hover:bg-slate-200 rounded">🎸</button>
+                <button type="button" onclick="setPersonSymbol('🚀')" class="p-1 hover:bg-slate-200 rounded">🚀</button>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+              <button type="button" onclick="resetPersonForm()" class="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700">Cancelar</button>
+              <button type="submit" id="btnSavePerson" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-xl">Guardar Pessoa</button>
+            </div>
+          </form>
+
+          <div>
+            <h4 class="font-bold text-slate-700 mb-2 text-xs uppercase tracking-wider">Pessoas Cadastradas:</h4>
+            <div id="peopleList" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- TAB 3: CATEGORIES -->
+        <div id="tabContentCategories" class="space-y-6 hidden">
+          <form onsubmit="handleAddCategory(event)" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <h3 class="font-bold text-slate-800 text-sm">Adicionar / Editar Categoria</h3>
+            <input type="hidden" id="editCategoryId" value="">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Nome da Categoria:</label>
+                <input type="text" id="categoryName" placeholder="Ex: Apresentação" required class="w-full border border-slate-300 rounded-xl p-2 outline-none focus:ring-2 focus:ring-amber-400">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Ícone / Emoji:</label>
+                <input type="text" id="categorySymbol" placeholder="Ex: 📝" required class="w-full border border-slate-300 rounded-xl p-2 outline-none focus:ring-2 focus:ring-amber-400">
+              </div>
+            </div>
+
+            <div>
+              <span class="block text-xs text-slate-500 mb-1">Escolha rápida de emoji:</span>
+              <div class="flex flex-wrap gap-1 text-base">
+                <button type="button" onclick="setCategorySymbol('📝')" class="p-1 hover:bg-slate-200 rounded">📝</button>
+                <button type="button" onclick="setCategorySymbol('💡')" class="p-1 hover:bg-slate-200 rounded">💡</button>
+                <button type="button" onclick="setCategorySymbol('🎵')" class="p-1 hover:bg-slate-200 rounded">🎵</button>
+                <button type="button" onclick="setCategorySymbol('🎯')" class="p-1 hover:bg-slate-200 rounded">🎯</button>
+                <button type="button" onclick="setCategorySymbol('📚')" class="p-1 hover:bg-slate-200 rounded">📚</button>
+                <button type="button" onclick="setCategorySymbol('🎨')" class="p-1 hover:bg-slate-200 rounded">🎨</button>
+                <button type="button" onclick="setCategorySymbol('⚽')" class="p-1 hover:bg-slate-200 rounded">⚽</button>
+                <button type="button" onclick="setCategorySymbol('🏆')" class="p-1 hover:bg-slate-200 rounded">🏆</button>
+                <button type="button" onclick="setCategorySymbol('🔬')" class="p-1 hover:bg-slate-200 rounded">🔬</button>
+                <button type="button" onclick="setCategorySymbol('🎭')" class="p-1 hover:bg-slate-200 rounded">🎭</button>
+                <button type="button" onclick="setCategorySymbol('📢')" class="p-1 hover:bg-slate-200 rounded">📢</button>
+                <button type="button" onclick="setCategorySymbol('📄')" class="p-1 hover:bg-slate-200 rounded">📄</button>
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+              <button type="button" onclick="resetCategoryForm()" class="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700">Cancelar</button>
+              <button type="submit" id="btnSaveCategory" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-xl">Guardar Categoria</button>
+            </div>
+          </form>
+
+          <div>
+            <h4 class="font-bold text-slate-700 mb-2 text-xs uppercase tracking-wider">Categorias Cadastradas:</h4>
+            <div id="categoriesList" class="space-y-2"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="bg-slate-50 border-t border-slate-200 p-3 px-6 flex justify-between items-center text-xs">
+        <button onclick="restoreDefaults()" class="text-rose-600 hover:underline font-semibold">Restaurar Dados Iniciais</button>
+        <button onclick="toggleModal('managerModal')" class="bg-slate-800 text-white font-bold px-4 py-2 rounded-xl">Fechar</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CUSTOM UI MESSAGE MODAL (NO ALERT/CONFIRM) -->
+  <div id="messageBox" class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60] hidden">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-4 border border-slate-100">
+      <div id="msgIcon" class="text-3xl">⚠️</div>
+      <p id="msgText" class="text-sm font-semibold text-slate-700"></p>
+      <div id="msgButtons" class="flex justify-center gap-2">
+        <button id="msgBtnOk" onclick="closeMessageBox()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-xs">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN SCRIPT -->
+  <script>
+    const DEFAULT_PEOPLE = [
+      { id: 'p1', name: 'Salomé', symbol: '❤️' },
+      { id: 'p2', name: 'Henrique', symbol: '🚀' }
+    ];
+
+    const DEFAULT_CATEGORIES = [
+      { id: 'c1', name: 'Teste', symbol: '📝' },
+      { id: 'c2', name: 'Questão-aula', symbol: '💡' },
+      { id: 'c3', name: 'Concerto', symbol: '🎵' },
+      { id: 'c4', name: 'Apresentação', symbol: '📢' }
+    ];
+
+    const DEFAULT_EVENTS = [
+      { id: 'e1', date: '2026-10-21', personId: 'p1', categoryId: 'c1', title: 'Teste de Geografia' },
+      { id: 'e2', date: '2026-10-28', personId: 'p1', categoryId: 'c1', title: 'Teste de Inglês' },
+      { id: 'e3', date: '2026-10-30', personId: 'p1', categoryId: 'c1', title: 'Teste de Matemática' },
+      { id: 'e4', date: '2026-10-30', personId: 'p2', categoryId: 'c1', title: 'Teste de Ciências Naturais' },
+
+      { id: 'e5', date: '2026-11-02', personId: 'p2', categoryId: 'c2', title: 'Questão-aula de Matemática' },
+      { id: 'e6', date: '2026-11-03', personId: 'p1', categoryId: 'c1', title: 'Teste de Português' },
+      { id: 'e7', date: '2026-11-05', personId: 'p1', categoryId: 'c1', title: 'Teste de Físico-Química' },
+      { id: 'e8', date: '2026-11-06', personId: 'p1', categoryId: 'c1', title: 'Teste de Francês' },
+      { id: 'e9', date: '2026-11-10', personId: 'p2', categoryId: 'c1', title: 'Teste de História e Geografia de Portugal' },
+      { id: 'e10', date: '2026-11-11', personId: 'p1', categoryId: 'c1', title: 'Teste de Português' },
+      { id: 'e11', date: '2026-11-17', personId: 'p1', categoryId: 'c4', title: 'Apresentação de Inglês' },
+      { id: 'e12', date: '2026-11-20', personId: 'p1', categoryId: 'c1', title: 'Teste de Matemática' },
+      { id: 'e13', date: '2026-11-23', personId: 'p1', categoryId: 'c1', title: 'Teste de Ciências' },
+      { id: 'e14', date: '2026-11-24', personId: 'p1', categoryId: 'c1', title: 'Teste de ICA' },
+      { id: 'e15', date: '2026-11-24', personId: 'p2', categoryId: 'c1', title: 'Teste de História e Geografia de Portugal' },
+      { id: 'e16', date: '2026-11-25', personId: 'p1', categoryId: 'c1', title: 'Teste de Inglês' },
+      { id: 'e17', date: '2026-11-30', personId: 'p1', categoryId: 'c1', title: 'Teste de Formação Musical' },
+
+      { id: 'e18', date: '2026-12-03', personId: 'p1', categoryId: 'c1', title: 'Teste de Físico-Química' },
+      { id: 'e19', date: '2026-12-04', personId: 'p2', categoryId: 'c1', title: 'Teste de Ciências Naturais' },
+      { id: 'e20', date: '2026-12-07', personId: 'p1', categoryId: 'c1', title: 'Teste de Formação Musical' },
+      { id: 'e21', date: '2026-12-07', personId: 'p1', categoryId: 'c1', title: 'Teste de Matemática' },
+      { id: 'e22', date: '2026-12-07', personId: 'p1', categoryId: 'c4', title: 'Apresentação de trabalho de Ciências' },
+      { id: 'e23', date: '2026-12-15', personId: 'p1', categoryId: 'c3', title: 'Concerto de Natal da Orquestra — São Jorge' },
+      { id: 'e24', date: '2026-12-16', personId: 'p2', categoryId: 'c3', title: 'Concerto de Natal do Coro' }
+    ];
+
+    const SCHOOL_YEAR_MONTHS = [
+      { key: '2026-09', name: 'Setembro', year: 2026, theme: 'autumn', icon: '🍁' },
+      { key: '2026-10', name: 'Outubro', year: 2026, theme: 'autumn', icon: '🍂' },
+      { key: '2026-11', name: 'Novembro', year: 2026, theme: 'autumn', icon: '🎶' },
+      { key: '2026-12', name: 'Dezembro', year: 2026, theme: 'winter', icon: '❄️' },
+      { key: '2027-01', name: 'Janeiro', year: 2027, theme: 'winter', icon: '☃️' },
+      { key: '2027-02', name: 'Fevereiro', year: 2027, theme: 'winter', icon: '🎭' },
+      { key: '2027-03', name: 'Março', year: 2027, theme: 'spring', icon: '🌱' },
+      { key: '2027-04', name: 'Abril', year: 2027, theme: 'spring', icon: '🌸' },
+      { key: '2027-05', name: 'Maio', year: 2027, theme: 'spring', icon: '🌺' },
+      { key: '2027-06', name: 'Junho', year: 2027, theme: 'summer', icon: '☀️' },
+      { key: '2027-07', name: 'Julho', year: 2027, theme: 'summer', icon: '🏖️' }
+    ];
+
+    let people = [];
+    let categories = [];
+    let events = [];
+
+    let selectedPeople = new Set();
+    let selectedCategories = new Set();
+    let selectedMonths = new Set();
+
+    let pendingConfirmCallback = null;
+
+    window.onload = function() {
+      loadData();
+      initDefaultFilters();
+      renderAll();
+    };
+
+    function loadData() {
+      const storedPeople = localStorage.getItem('cal_people_v2');
+      const storedCategories = localStorage.getItem('cal_categories_v2');
+      const storedEvents = localStorage.getItem('cal_events_v2');
+
+      people = storedPeople ? JSON.parse(storedPeople) : [...DEFAULT_PEOPLE];
+      categories = storedCategories ? JSON.parse(storedCategories) : [...DEFAULT_CATEGORIES];
+      events = storedEvents ? JSON.parse(storedEvents) : [...DEFAULT_EVENTS];
+    }
+
+    function saveData() {
+      localStorage.setItem('cal_people_v2', JSON.stringify(people));
+      localStorage.setItem('cal_categories_v2', JSON.stringify(categories));
+      localStorage.setItem('cal_events_v2', JSON.stringify(events));
+    }
+
+    function initDefaultFilters() {
+      selectedPeople = new Set(people.map(p => p.id));
+      selectedCategories = new Set(categories.map(c => c.id));
+      
+      const monthsWithEvents = SCHOOL_YEAR_MONTHS.filter(m => 
+        events.some(e => e.date.startsWith(m.key))
+      ).map(m => m.key);
+
+      if (monthsWithEvents.length > 0) {
+        selectedMonths = new Set(monthsWithEvents);
+      } else {
+        selectedMonths = new Set(['2026-10', '2026-11', '2026-12']);
+      }
+    }
+
+    function resetFilters() {
+      selectedPeople = new Set(people.map(p => p.id));
+      selectedCategories = new Set(categories.map(c => c.id));
+      selectedMonths = new Set(SCHOOL_YEAR_MONTHS.map(m => m.key));
+      renderAll();
+    }
+
+    function triggerPrint() {
+      window.print();
+    }
+
+    function savePageHTML() {
+      saveData();
+      const cloneDoc = document.documentElement.cloneNode(true);
+      
+      const managerModal = cloneDoc.querySelector('#managerModal');
+      if (managerModal) managerModal.classList.add('hidden');
+      const messageBox = cloneDoc.querySelector('#messageBox');
+      if (messageBox) messageBox.classList.add('hidden');
+
+      const htmlContent = "<!DOCTYPE html>\n" + cloneDoc.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'calendario_escolar_26_27_atualizado.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function showCustomAlert(text) {
+      document.getElementById('msgIcon').textContent = '⚠️';
+      document.getElementById('msgText').textContent = text;
+      document.getElementById('msgButtons').innerHTML = `
+        <button onclick="closeMessageBox()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-xs">OK</button>
+      `;
+      document.getElementById('messageBox').classList.remove('hidden');
+    }
+
+    function showCustomConfirm(text, onConfirm) {
+      pendingConfirmCallback = onConfirm;
+      document.getElementById('msgIcon').textContent = '❓';
+      document.getElementById('msgText').textContent = text;
+      document.getElementById('msgButtons').innerHTML = `
+        <button onclick="closeMessageBox()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs">Cancelar</button>
+        <button onclick="executeConfirm()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Confirmar</button>
+      `;
+      document.getElementById('messageBox').classList.remove('hidden');
+    }
+
+    function executeConfirm() {
+      if (pendingConfirmCallback) {
+        pendingConfirmCallback();
+        pendingConfirmCallback = null;
+      }
+      closeMessageBox();
+    }
+
+    function closeMessageBox() {
+      document.getElementById('messageBox').classList.add('hidden');
+    }
+
+    function renderAll() {
+      renderFilters();
+      renderLegend();
+      renderCalendar();
+      renderManagementLists();
+      updateSubtitles();
+    }
+
+    function renderFilters() {
+      const pContainer = document.getElementById('filterPeopleContainer');
+      pContainer.innerHTML = people.map(p => `
+        <button onclick="toggleFilter('person', '${p.id}')" class="px-2.5 py-1 rounded-full text-xs font-bold border transition ${selectedPeople.has(p.id) ? 'bg-amber-500 text-white border-amber-600 shadow-sm' : 'bg-slate-100 text-slate-500 border-slate-200'}">
+          ${p.symbol} ${p.name}
+        </button>
+      `).join('');
+
+      const cContainer = document.getElementById('filterCategoriesContainer');
+      cContainer.innerHTML = categories.map(c => `
+        <button onclick="toggleFilter('category', '${c.id}')" class="px-2.5 py-1 rounded-full text-xs font-bold border transition ${selectedCategories.has(c.id) ? 'bg-amber-500 text-white border-amber-600 shadow-sm' : 'bg-slate-100 text-slate-500 border-slate-200'}">
+          ${c.symbol} ${c.name}
+        </button>
+      `).join('');
+
+      const mContainer = document.getElementById('filterMonthsContainer');
+      mContainer.innerHTML = SCHOOL_YEAR_MONTHS.map(m => `
+        <button onclick="toggleFilter('month', '${m.key}')" class="px-2 py-0.5 rounded text-[11px] font-semibold border transition ${selectedMonths.has(m.key) ? 'bg-amber-700 text-white border-amber-800' : 'bg-slate-50 text-slate-400 border-slate-200'}">
+          ${m.name.slice(0, 3)}
+        </button>
+      `).join('');
+    }
+
+    function toggleFilter(type, id) {
+      if (type === 'person') {
+        selectedPeople.has(id) ? selectedPeople.delete(id) : selectedPeople.add(id);
+      } else if (type === 'category') {
+        selectedCategories.has(id) ? selectedCategories.delete(id) : selectedCategories.add(id);
+      } else if (type === 'month') {
+        selectedMonths.has(id) ? selectedMonths.delete(id) : selectedMonths.add(id);
+      }
+      renderAll();
+    }
+
+    function renderLegend() {
+      const legend = document.getElementById('calendarLegend');
+      let html = '';
+
+      categories.forEach(c => {
+        html += `<span class="flex items-center gap-1"><span class="text-sm">${c.symbol}</span> ${c.name}</span>`;
+      });
+
+      html += `<span class="text-amber-300">|</span>`;
+
+      people.forEach(p => {
+        html += `<span class="flex items-center gap-1"><span class="text-amber-600">${p.symbol}</span> ${p.name}</span>`;
+      });
+
+      legend.innerHTML = html;
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById('monthsGrid');
+      grid.innerHTML = '';
+
+      const activeMonths = SCHOOL_YEAR_MONTHS.filter(m => selectedMonths.has(m.key));
+
+      if (activeMonths.length === 0) {
+        grid.innerHTML = `
+          <div class="text-center py-12 text-slate-400 font-semibold">
+            Nenhum mês selecionado para exibição.
+          </div>
+        `;
+        return;
+      }
+
+      activeMonths.forEach(m => {
+        const monthEvents = events.filter(e => {
+          const isMonth = e.date.startsWith(m.key);
+          const isPerson = selectedPeople.has(e.personId);
+          const isCategory = selectedCategories.has(e.categoryId);
+          return isMonth && isPerson && isCategory;
+        });
+
+        monthEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        const headerColors = {
+          autumn: 'bg-amber-600 text-white',
+          winter: 'bg-sky-600 text-white',
+          spring: 'bg-emerald-600 text-white',
+          summer: 'bg-rose-600 text-white'
+        }[m.theme];
+
+        const monthBlock = document.createElement('div');
+        monthBlock.className = `month-block border-2 rounded-3xl overflow-hidden shadow-sm bg-white/80 border-amber-200`;
+
+        let eventsHTML = '';
+
+        if (monthEvents.length === 0) {
+          eventsHTML = `
+            <div class="p-4 text-center text-xs text-slate-400 italic">
+              Sem eventos agendados ou visíveis para este mês.
+            </div>
+          `;
+        } else {
+          eventsHTML = monthEvents.map(e => {
+            const person = people.find(p => p.id === e.personId) || { name: '?', symbol: '?' };
+            const category = categories.find(c => c.id === e.categoryId) || { symbol: '📝' };
+            const dayNum = parseInt(e.date.split('-')[2], 10);
+            const dayStr = `${dayNum} ${m.name.toLowerCase()}`;
+
+            return `
+              <div class="flex items-center gap-2 sm:gap-3 p-2 hover:bg-amber-50/50 rounded-xl transition border-b border-dashed border-slate-100 last:border-none text-xs sm:text-sm group">
+                <div class="w-20 sm:w-28 font-bold text-slate-700 text-right shrink-0">
+                  ${dayStr}
+                </div>
+
+                <div class="w-20 sm:w-24 font-bold text-amber-800 bg-amber-100/60 border border-amber-200/80 px-2 py-0.5 rounded-full flex items-center justify-center gap-1 shrink-0">
+                  <span class="text-amber-600">${person.symbol}</span>
+                  <span class="truncate">${person.name}</span>
+                </div>
+
+                <div class="text-base sm:text-lg shrink-0 w-6 text-center">
+                  ${category.symbol}
+                </div>
+
+                <div class="font-bold text-slate-800 flex-1 truncate">
+                  ${e.title}
+                </div>
+
+                <div class="no-print action-buttons flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
+                  <button onclick="openEditEventModal('${e.id}')" title="Editar Evento" class="p-1 hover:bg-amber-200 rounded-lg text-amber-800 transition">
+                    ✏️
+                  </button>
+                  <button onclick="confirmDeleteEvent('${e.id}')" title="Eliminar Evento" class="p-1 hover:bg-rose-200 rounded-lg text-rose-700 transition">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        monthBlock.innerHTML = `
+          <div class="${headerColors} py-2 px-6 flex items-center justify-between shadow-sm">
+            <span class="text-lg">${m.icon}</span>
+            <h3 class="font-title text-xl sm:text-2xl font-bold tracking-wide">${m.name}</h3>
+            <span class="text-xs font-bold opacity-80">${m.year}</span>
+          </div>
+
+          <div class="p-2 sm:p-3 space-y-1">
+            ${eventsHTML}
+          </div>
+        `;
+
+        grid.appendChild(monthBlock);
+      });
+    }
+
+    function updateSubtitles() {
+      const activePeople = people.filter(p => selectedPeople.has(p.id)).map(p => p.name);
+      const subtitle = document.getElementById('displayPeopleSubtitle');
+      if (activePeople.length > 0) {
+        subtitle.textContent = activePeople.join(' e ');
+      } else {
+        subtitle.textContent = 'Todos';
+      }
+    }
+
+    function toggleModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.toggle('hidden');
+    }
+
+    function switchTab(tab) {
+      document.getElementById('tabContentEvents').classList.add('hidden');
+      document.getElementById('tabContentPeople').classList.add('hidden');
+      document.getElementById('tabContentCategories').classList.add('hidden');
+
+      document.getElementById('tabBtnEvents').className = 'flex-1 py-3 px-4 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+      document.getElementById('tabBtnPeople').className = 'flex-1 py-3 px-4 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+      document.getElementById('tabBtnCategories').className = 'flex-1 py-3 px-4 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+
+      if (tab === 'events') {
+        document.getElementById('tabContentEvents').classList.remove('hidden');
+        document.getElementById('tabBtnEvents').className = 'flex-1 py-3 px-4 text-center border-b-2 border-amber-500 text-amber-700 font-bold bg-white';
+      } else if (tab === 'people') {
+        document.getElementById('tabContentPeople').classList.remove('hidden');
+        document.getElementById('tabBtnPeople').className = 'flex-1 py-3 px-4 text-center border-b-2 border-amber-500 text-amber-700 font-bold bg-white';
+      } else if (tab === 'categories') {
+        document.getElementById('tabContentCategories').classList.remove('hidden');
+        document.getElementById('tabBtnCategories').className = 'flex-1 py-3 px-4 text-center border-b-2 border-amber-500 text-amber-700 font-bold bg-white';
+      }
+    }
+
+    function renderManagementLists() {
+      const personSelect = document.getElementById('eventPerson');
+      personSelect.innerHTML = people.map(p => `<option value="${p.id}">${p.symbol} ${p.name}</option>`).join('');
+
+      const catSelect = document.getElementById('eventCategory');
+      catSelect.innerHTML = categories.map(c => `<option value="${c.id}">${c.symbol} ${c.name}</option>`).join('');
+
+      const eventsTbody = document.getElementById('eventsTableBody');
+      const sortedEvents = [...events].sort((a,b) => new Date(a.date) - new Date(b.date));
+      eventsTbody.innerHTML = sortedEvents.map(e => {
+        const p = people.find(item => item.id === e.personId) || { name: '?' };
+        const c = categories.find(item => item.id === e.categoryId) || { name: '?' };
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="p-2.5 font-semibold text-slate-700">${e.date}</td>
+            <td class="p-2.5">${p.name}</td>
+            <td class="p-2.5">${c.name}</td>
+            <td class="p-2.5 font-medium">${e.title}</td>
+            <td class="p-2.5 text-right space-x-1">
+              <button onclick="editEvent('${e.id}')" class="text-amber-600 hover:text-amber-800 font-bold">Editar</button>
+              <button onclick="confirmDeleteEvent('${e.id}')" class="text-rose-600 hover:text-rose-800 font-bold ml-2">Eliminar</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const peopleList = document.getElementById('peopleList');
+      peopleList.innerHTML = people.map(p => `
+        <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <div class="flex items-center gap-2 font-bold text-slate-700">
+            <span class="text-base">${p.symbol}</span>
+            <span>${p.name}</span>
+          </div>
+          <div class="space-x-2">
+            <button onclick="editPerson('${p.id}')" class="text-amber-600 hover:underline text-xs font-semibold">Editar</button>
+            <button onclick="deletePerson('${p.id}')" class="text-rose-600 hover:underline text-xs font-semibold">Eliminar</button>
+          </div>
+        </div>
+      `).join('');
+
+      const categoriesList = document.getElementById('categoriesList');
+      categoriesList.innerHTML = categories.map(c => `
+        <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <div class="flex items-center gap-2 font-bold text-slate-700">
+            <span class="text-base">${c.symbol}</span>
+            <span>${c.name}</span>
+          </div>
+          <div class="space-x-2">
+            <button onclick="editCategory('${c.id}')" class="text-amber-600 hover:underline text-xs font-semibold">Editar</button>
+            <button onclick="deleteCategory('${c.id}')" class="text-rose-600 hover:underline text-xs font-semibold">Eliminar</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openAddEventModal() {
+      resetEventForm();
+      switchTab('events');
+      const modal = document.getElementById('managerModal');
+      if (modal.classList.contains('hidden')) {
+        toggleModal('managerModal');
+      }
+    }
+
+    function openEditEventModal(id) {
+      editEvent(id);
+      const modal = document.getElementById('managerModal');
+      if (modal.classList.contains('hidden')) {
+        toggleModal('managerModal');
+      }
+    }
+
+    function handleSaveEvent(e) {
+      e.preventDefault();
+      const id = document.getElementById('eventId').value;
+      const date = document.getElementById('eventDate').value;
+      const personId = document.getElementById('eventPerson').value;
+      const categoryId = document.getElementById('eventCategory').value;
+      const title = document.getElementById('eventTitle').value.trim();
+
+      if (!date || !title) return;
+
+      if (id) {
+        const index = events.findIndex(ev => ev.id === id);
+        if (index !== -1) {
+          events[index] = { id, date, personId, categoryId, title };
+        }
+      } else {
+        const newEv = {
+          id: 'e_' + Date.now(),
+          date,
+          personId,
+          categoryId,
+          title
+        };
+        events.push(newEv);
+      }
+
+      saveData();
+      resetEventForm();
+      renderAll();
+    }
+
+    function editEvent(id) {
+      const ev = events.find(e => e.id === id);
+      if (!ev) return;
+
+      document.getElementById('eventId').value = ev.id;
+      document.getElementById('eventDate').value = ev.date;
+      document.getElementById('eventPerson').value = ev.personId;
+      document.getElementById('eventCategory').value = ev.categoryId;
+      document.getElementById('eventTitle').value = ev.title;
+      
+      switchTab('events');
+    }
+
+    function confirmDeleteEvent(id) {
+      showCustomConfirm('Tem a certeza que deseja remover este evento?', () => {
+        deleteEvent(id);
+      });
+    }
+
+    function deleteEvent(id) {
+      events = events.filter(e => e.id !== id);
+      saveData();
+      renderAll();
+    }
+
+    function resetEventForm() {
+      document.getElementById('eventId').value = '';
+      document.getElementById('eventDate').value = '';
+      document.getElementById('eventTitle').value = '';
+    }
+
+    function setPersonSymbol(symbol) {
+      document.getElementById('personSymbol').value = symbol;
+    }
+
+    function handleAddPerson(e) {
+      e.preventDefault();
+      const id = document.getElementById('editPersonId').value;
+      const name = document.getElementById('personName').value.trim();
+      const symbol = document.getElementById('personSymbol').value.trim() || '👤';
+
+      if (!name) return;
+
+      if (id) {
+        const index = people.findIndex(p => p.id === id);
+        if (index !== -1) {
+          people[index] = { id, name, symbol };
+        }
+      } else {
+        const newP = { id: 'p_' + Date.now(), name, symbol };
+        people.push(newP);
+        selectedPeople.add(newP.id);
+      }
+
+      saveData();
+      resetPersonForm();
+      renderAll();
+    }
+
+    function editPerson(id) {
+      const p = people.find(item => item.id === id);
+      if (!p) return;
+      document.getElementById('editPersonId').value = p.id;
+      document.getElementById('personName').value = p.name;
+      document.getElementById('personSymbol').value = p.symbol;
+      document.getElementById('btnSavePerson').textContent = 'Atualizar Pessoa';
+    }
+
+    function resetPersonForm() {
+      document.getElementById('editPersonId').value = '';
+      document.getElementById('personName').value = '';
+      document.getElementById('personSymbol').value = '';
+      document.getElementById('btnSavePerson').textContent = 'Guardar Pessoa';
+    }
+
+    function deletePerson(id) {
+      if (people.length <= 1) {
+        showCustomAlert('Deve existir pelo menos uma pessoa no calendário.');
+        return;
+      }
+      showCustomConfirm('Remover esta pessoa apagará também os eventos associados a ela. Continuar?', () => {
+        people = people.filter(p => p.id !== id);
+        events = events.filter(e => e.personId !== id);
+        selectedPeople.delete(id);
+        saveData();
+        renderAll();
+      });
+    }
+
+    function setCategorySymbol(symbol) {
+      document.getElementById('categorySymbol').value = symbol;
+    }
+
+    function handleAddCategory(e) {
+      e.preventDefault();
+      const id = document.getElementById('editCategoryId').value;
+      const name = document.getElementById('categoryName').value.trim();
+      const symbol = document.getElementById('categorySymbol').value.trim() || '📌';
+
+      if (!name) return;
+
+      if (id) {
+        const index = categories.findIndex(c => c.id === id);
+        if (index !== -1) {
+          categories[index] = { id, name, symbol };
+        }
+      } else {
+        const newC = { id: 'c_' + Date.now(), name, symbol };
+        categories.push(newC);
+        selectedCategories.add(newC.id);
+      }
+
+      saveData();
+      resetCategoryForm();
+      renderAll();
+    }
+
+    function editCategory(id) {
+      const c = categories.find(item => item.id === id);
+      if (!c) return;
+      document.getElementById('editCategoryId').value = c.id;
+      document.getElementById('categoryName').value = c.name;
+      document.getElementById('categorySymbol').value = c.symbol;
+      document.getElementById('btnSaveCategory').textContent = 'Atualizar Categoria';
+    }
+
+    function resetCategoryForm() {
+      document.getElementById('editCategoryForm');
+      document.getElementById('editCategoryId').value = '';
+      document.getElementById('categoryName').value = '';
+      document.getElementById('categorySymbol').value = '';
+      document.getElementById('btnSaveCategory').textContent = 'Guardar Categoria';
+    }
+
+    function deleteCategory(id) {
+      if (categories.length <= 1) {
+        showCustomAlert('Deve existir pelo menos uma categoria no calendário.');
+        return;
+      }
+      showCustomConfirm('Remover esta categoria apagará também os eventos associados. Continuar?', () => {
+        categories = categories.filter(c => c.id !== id);
+        events = events.filter(e => e.categoryId !== id);
+        selectedCategories.delete(id);
+        saveData();
+        renderAll();
+      });
+    }
+
+    function restoreDefaults() {
+      showCustomConfirm('Tem a certeza de que deseja restaurar os dados iniciais do modelo? Todas as personalizações serão limpas.', () => {
+        people = [...DEFAULT_PEOPLE];
+        categories = [...DEFAULT_CATEGORIES];
+        events = [...DEFAULT_EVENTS];
+        saveData();
+        initDefaultFilters();
+        renderAll();
+        toggleModal('managerModal');
+      });
+    }
+  </script>
+
+</body>
+</html>
